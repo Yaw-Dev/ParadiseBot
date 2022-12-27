@@ -34,4 +34,5 @@ setverification [#channel] [@role] [message] : Configure the verification event 
 <hr>
 <br>
 Made by <b>A WeirD KiD#2452</b> & <b>Yaw#0224</b><br>
-Join our <a href="https://discord.gg/kWvj4JsWbW">Discord Server</a> for support & additional info.
+Join our <a href="https://discord.gg/kWvj4JsWbW">Discord Server</a> for support & additional info.<br>
+More updates coming soon :)
