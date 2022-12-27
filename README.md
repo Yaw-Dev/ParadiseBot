@@ -29,7 +29,7 @@ setverification [#channel] [@role] [message] : Configure the verification event 
 <h1>How to Setup</h1>
 1. Open <b>main.py</b> and scroll all the way down.<br>
 2. Replace <b>YOUR_TOKEN_HERE</b> with your bot's token.<br>
-3. If you want to host the bot in your local machine run <b>setup.bat</b>.<br>
+3. If you want to host the bot on your local machine run <b>setup.bat</b>.<br>
 4. Run <b>main.py</b>.<br>
 <hr>
 <br>
