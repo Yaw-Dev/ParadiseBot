@@ -13,7 +13,7 @@ bot = commands.Bot(command_prefix=['=', '?', '.'], intents=discord.Intents.all()
 
 @bot.command(name='purge', aliases=['clear'])
 @commands.has_permissions(manage_messages=True)
-@commands.cooldown(2, 25, commands.BucketType.channel)  
+@commands.cooldown(3, 25, commands.BucketType.channel)  
 async def purge(ctx, amount: int):
     print("[@bot.command] Purge was executed")
     await ctx.message.delete()
@@ -24,16 +24,23 @@ async def purge(ctx, amount: int):
     
     messages = await ctx.channel.history(limit=amount).flatten()
     num_deleted = len(messages)
+    now = datetime.datetime.utcnow()
+    old_messages = [msg for msg in messages if (now - msg.created_at).days >= 14]
+
+    if old_messages:
+        await ctx.send("You cannot delete messages that are older than 14 days. Please try again with a smaller amount.", delete_after=5)
+        return
 
     if num_deleted > 1:
         await ctx.channel.delete_messages(messages)
         await ctx.send(f'Successfully purged **{num_deleted}** message(s)', delete_after=5)
     else:
         await ctx.send("No messages were found to delete.", delete_after=5)
+
 #------------------------
 
-@bot.command(name='invite', aliases=['inv'])
-@commands.cooldown(2, 20, commands.BucketType.channel)  
+@bot.command(name='invite', aliases=['inv', 'authurl'])
+@commands.cooldown(3, 20, commands.BucketType.channel)  
 async def invite(ctx):
     print("[@bot.command] Invite was executed")
     await ctx.message.delete()
@@ -42,7 +49,7 @@ async def invite(ctx):
 #------------------------
 
 @bot.command(name='support', aliases=['home'])
-@commands.cooldown(2, 20, commands.BucketType.channel)  
+@commands.cooldown(3, 20, commands.BucketType.channel)  
 async def support(ctx):
     print("[@bot.command] Support was executed")
     await ctx.message.delete()
@@ -56,7 +63,7 @@ def uptime():
   uptime = current_time - start_time
   start_time_str = datetime.datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')
   current_time_str = datetime.datetime.fromtimestamp(current_time).strftime('%Y-%m-%d %H:%M:%S')
-  uptime_str = "**Uptime:** " + str(int(uptime // 3600)) + " hours, " + str(int(uptime % 3600 // 60)) + " minutes, " + str(int(uptime % 60)) + " seconds" + "\n\n**Started at:** " + start_time_str + "\n**Current time:** " + current_time_str
+  uptime_str = "Uptime: " + str(int(uptime // 86400)) + " days, " + str(int(uptime % 86400 // 3600)) + " hours, " + str(int(uptime % 3600 // 60)) + " minutes, " + str(int(uptime % 60)) + " seconds" + "\n\nStarted at: " + start_time_str + "\nCurrent time: " + current_time_str
   return uptime_str
   
 @bot.command(name='uptime', aliases=['awaketime', 'ontime'])
@@ -69,7 +76,7 @@ async def appuptime(ctx):
 
 @bot.command(name='warn', aliases=['w'])
 @commands.has_permissions(manage_roles=True)
-@commands.cooldown(2, 15, commands.BucketType.channel)  
+@commands.cooldown(3, 15, commands.BucketType.channel)  
 async def warn(ctx, member: discord.Member, *, reason=None):
     print("[@bot.command] Warn was executed")
     await ctx.message.delete()
@@ -97,7 +104,7 @@ async def warn(ctx, member: discord.Member, *, reason=None):
 
 @bot.command(name='removewarn', aliases=['rw'])
 @commands.has_permissions(manage_roles=True)
-@commands.cooldown(2, 15, commands.BucketType.channel)  
+@commands.cooldown(3, 15, commands.BucketType.channel)  
 async def removewarn(ctx, member: discord.Member, number: int):
     print("[@bot.command] Removewarn was executed")
     await ctx.message.delete()
@@ -122,7 +129,7 @@ async def removewarn(ctx, member: discord.Member, number: int):
 
 @bot.command(name='viewwarns', aliases=['vw', 'warns'])
 @commands.has_permissions(manage_roles=True)
-@commands.cooldown(2, 20, commands.BucketType.channel)  
+@commands.cooldown(3, 20, commands.BucketType.channel)  
 async def viewwarns(ctx, member: discord.Member):
     print("[@bot.command] Viewwarns was executed")
     await ctx.message.delete()
@@ -167,16 +174,16 @@ async def clearwarns(ctx, member: discord.Member):
 
 @bot.command(name='ban', aliases=['b'])
 @commands.has_permissions(ban_members=True)
-@commands.cooldown(2, 15, commands.BucketType.channel)  
+@commands.cooldown(3, 15, commands.BucketType.channel)  
 async def ban(ctx, member: discord.Member, *, reason=None):
     print("[@bot.command] Ban was executed")
     await ctx.message.delete()
     await member.ban(reason=reason)
-    await ctx.send(f'**{member}** has been banned.', delete_after=5)
+    await ctx.send(f'**{member}** has been banned.')
 
 @bot.command(name='unban')
 @commands.has_permissions(ban_members=True)
-@commands.cooldown(2, 15, commands.BucketType.channel)  
+@commands.cooldown(3, 15, commands.BucketType.channel)  
 async def unban(ctx, *, user: discord.User):
     print("[@bot.command] Unban was executed")
     await ctx.message.delete()
@@ -189,17 +196,17 @@ async def unban(ctx, *, user: discord.User):
 
 @bot.command(name='kick', aliases=['k'])
 @commands.has_permissions(kick_members=True)
-@commands.cooldown(2, 15, commands.BucketType.channel)  
+@commands.cooldown(3, 15, commands.BucketType.channel)  
 async def kick(ctx, member: discord.Member, *, reason=None):
     print("[@bot.command] Kick was executed")
     await ctx.message.delete()
     await member.kick(reason=reason)
-    await ctx.send(f'**{member}** has been kicked from the server.', delete_after=5)
+    await ctx.send(f'**{member}** has been kicked from the server.')
 #------------------------
 
 @bot.command(name='mute', aliases=['m'])
 @commands.has_permissions(manage_roles=True)
-@commands.cooldown(2, 15, commands.BucketType.channel)  
+@commands.cooldown(3, 15, commands.BucketType.channel)  
 async def mute(ctx, member: discord.Member, duration: str = None, *, reason=None):
     print("[@bot.command] Mute was executed")
     await ctx.message.delete()
@@ -257,7 +264,7 @@ async def mute(ctx, member: discord.Member, duration: str = None, *, reason=None
 
 @bot.command(name='unmute', aliases=['um'])
 @commands.has_permissions(manage_roles=True)
-@commands.cooldown(2, 15, commands.BucketType.channel)  
+@commands.cooldown(3, 15, commands.BucketType.channel)  
 async def unmute(ctx, member: discord.Member):
     print("[@bot.command] Unmute was executed")
     await ctx.message.delete()
@@ -288,7 +295,7 @@ async def filesay(ctx, file_name: str):
 #------------------------
 
 @bot.command(name='avatar', aliases=['av'])
-@commands.cooldown(2, 25, commands.BucketType.channel)  
+@commands.cooldown(3, 25, commands.BucketType.channel)  
 async def avatar(ctx, *, user: discord.Member):
     await ctx.message.delete()
     print("[@bot.command] Avatar was executed")
@@ -305,15 +312,6 @@ async def on_ready():
     await bot.change_presence(activity=botactivity, status=discord.Status.do_not_disturb)
     print("RPC Connected")
     print("")
-
-    with open('data/misc/messages.txt') as f:
-        messages = f.read().splitlines()
-    await bot.wait_until_ready()
-    while True:
-        channel = bot.get_channel(1050775908291719242)
-        for message in messages:
-            await channel.send(message)
-            await asyncio.sleep(1800)
 #------------------------
 
 @bot.event
@@ -330,7 +328,7 @@ async def on_raw_reaction_add(event):
 
 
 @bot.command(name='setverify', aliases=['setverification', 'cfgverify'])
-@commands.cooldown(2, 15, commands.BucketType.channel)  
+@commands.cooldown(2, 20, commands.BucketType.channel)  
 async def setverification(ctx, channel: discord.TextChannel, role: discord.Role, *, message: str):
     if not ctx.author.guild_permissions.manage_guild:
         await ctx.send('You do not have the "Manage Server" permission.', delete_after=5)
@@ -393,7 +391,7 @@ async def on_member_join(member):
 
 @bot.event
 async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandOnCooldown):
+    if isinstance(error, commands.CommandOnCooldown) and not isinstance(error, commands.CommandNotFound):
         await ctx.message.delete()
         await ctx.send(f'You are being rate limited. Please try again in {error.retry_after:.1f} seconds.', delete_after=5)
 
