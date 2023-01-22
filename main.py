@@ -63,7 +63,7 @@ def uptime():
   uptime = current_time - start_time
   start_time_str = datetime.datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')
   current_time_str = datetime.datetime.fromtimestamp(current_time).strftime('%Y-%m-%d %H:%M:%S')
-  uptime_str = "Uptime: " + str(int(uptime // 86400)) + " days, " + str(int(uptime % 86400 // 3600)) + " hours, " + str(int(uptime % 3600 // 60)) + " minutes, " + str(int(uptime % 60)) + " seconds" + "\n\nStarted at: " + start_time_str + "\nCurrent time: " + current_time_str
+  uptime_str = "**Uptime:** " + str(int(uptime // 86400)) + " days, " + str(int(uptime % 86400 // 3600)) + " hours, " + str(int(uptime % 3600 // 60)) + " minutes, " + str(int(uptime % 60)) + " seconds" + "\n\n**Started at:** " + start_time_str + "\n**Current time:** " + current_time_str
   return uptime_str
   
 @bot.command(name='uptime', aliases=['awaketime', 'ontime'])
