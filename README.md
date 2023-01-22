@@ -29,10 +29,16 @@ setverification [#channel] [@role] [message] : Configure the verification event 
 <h1>How to Setup</h1>
 1. Open <b>main.py</b> and scroll all the way down.<br>
 2. Replace <b>YOUR_TOKEN_HERE</b> with your bot's token.<br>
-3. If you want to host the bot on your local machine run <b>setup.bat</b>.<br>
+3. If you want to host the bot on your local machine run <b>deploy.bat</b>.<br>
 4. Run <b>main.py</b>.<br>
+<br>
+<h2>Changelog (22.01.2023)</h2>
+- Removed `message` event.<br>
+- Improved `Purge` command.<br>
+- Improved `Uptime` command.<br>
+- Optimized Cooldowns for all Commands.<br>
 <hr>
 <br>
-Made by <b>A WeirD KiD#2452</b> & <b>Yaw#0224</b><br>
+Made by <b>A WeirD KiD#2452</b> & <b>JuicyChann#0224</b><br>
 Join our <a href="https://discord.gg/kWvj4JsWbW">Discord Server</a> for support & additional info.<br>
 More updates coming soon :)
