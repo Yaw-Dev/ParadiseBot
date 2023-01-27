@@ -61,7 +61,7 @@ async def support(ctx):
 async def support(ctx):
     print("[@bot.command] Source was executed")
     await ctx.message.delete()
-    repourl = f'https://discord.gg/kWvj4JsWbW'
+    repourl = f'https://github.com/AWeirDKiD/ParadiseBot'
     await ctx.send(f'Yes! I am open source: {repourl}')
 #------------------------
 
