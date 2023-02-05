@@ -37,7 +37,7 @@ setverification [#channel] [@role] [message] : Configure the verification event 
 3. If you want to host the bot on your local machine run <b>deploy.bat</b>.<br>
 4. Run <b>main.py</b>.<br>
 <br>
-<h2>Changelog (27.01.2023)</h2>
+<h2>Changelog (05.02.2023)</h2>
 - Improved `removewarn` command. (set default *number* value, checks)<br>
 - Improved `clearwarns` command. (checks)<br>
 - Improved `viewwarns` command. (embed, checks)<br>
