@@ -8,7 +8,7 @@ import time
 from discord.ext import commands
 
 
-bot = commands.Bot(command_prefix=['=', '?', '.'], intents=discord.Intents.all(), case_insensitive=True)
+bot = commands.Bot(command_prefix=['=', '.'], intents=discord.Intents.all(), case_insensitive=True)
 #------------------------
 
 @bot.command(name='purge', aliases=['clear'], help="Deletes a specified ammount of messages on a channel. (max: 100)")
@@ -39,7 +39,7 @@ async def purge(ctx, amount: int):
 #------------------------
 
 @bot.command(name='invite', aliases=['inv', 'authurl'], help="Displays the bot's OAuth URL (all perms)")
-@commands.cooldown(3, 20, commands.BucketType.channel)  
+@commands.cooldown(2, 20, commands.BucketType.channel)  
 async def invite(ctx):
     print("[@bot.command] Invite was executed")
     await ctx.message.delete()
@@ -48,7 +48,7 @@ async def invite(ctx):
 #------------------------
 
 @bot.command(name='support', aliases=['home'], help="Invite to the Bot's Support Server.")
-@commands.cooldown(3, 20, commands.BucketType.channel)  
+@commands.cooldown(2, 20, commands.BucketType.channel)  
 async def support(ctx):
     print("[@bot.command] Support was executed")
     await ctx.message.delete()
@@ -57,7 +57,7 @@ async def support(ctx):
 #------------------------
 
 @bot.command(name='source', help="Gives out the github repo of the bot.")
-@commands.cooldown(3, 20, commands.BucketType.channel)  
+@commands.cooldown(1, 20, commands.BucketType.channel)  
 async def support(ctx):
     print("[@bot.command] Source was executed")
     await ctx.message.delete()
@@ -77,22 +77,42 @@ start_time = time.time()
 def uptime():
   current_time = time.time()
   uptime = current_time - start_time
+
+  days = int(uptime // 86400)
+  hours = int(uptime % 86400 // 3600)
+  minutes = int(uptime % 3600 // 60)
+  seconds = int(uptime % 60)
+
+  uptime_str = "**Current Uptime:**"
+  if days > 0:
+    uptime_str += " " + str(days) + " days"
+  if hours > 0:
+    uptime_str += " " + str(hours) + " hours"
+  if minutes > 0:
+    uptime_str += " " + str(minutes) + " minutes"
+  if seconds > 0:
+    uptime_str += " " + str(seconds) + " seconds"
+
   start_time_str = datetime.datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')
   current_time_str = datetime.datetime.fromtimestamp(current_time).strftime('%Y-%m-%d %H:%M:%S')
-  uptime_str = "**Uptime:** " + str(int(uptime // 86400)) + " days, " + str(int(uptime % 86400 // 3600)) + " hours, " + str(int(uptime % 3600 // 60)) + " minutes, " + str(int(uptime % 60)) + " seconds" + "\n\n**Start Date:** " + start_time_str + "\n**Current Date:** " + current_time_str
+  uptime_str += "\n\n**Start Date:** " + start_time_str + "\n**Current Date:** " + current_time_str
   return uptime_str
-  
+
+
 @bot.command(name='uptime', aliases=['awaketime'], help="Displays the bot's current uptime and start date.")
 @commands.cooldown(2, 30, commands.BucketType.channel)
 async def appuptime(ctx):
   print("[@bot.command] Uptime was executed")
   await ctx.message.delete()
-  await ctx.send(uptime())
+  uptime_str = uptime()
+  embed = discord.Embed(title="Online Status", description=uptime_str, color=discord.Color.green())
+  embed.set_thumbnail(url="https://raw.githubusercontent.com/AWeirDKiD/ParadiseBot/cb3778d1927340a9413cbb46a5781e89c87f8e86/assets/logo.png")
+  await ctx.send(embed=embed)
 #----------------------
 
-@bot.command(name="nuke", aliases=["nukechannel"], help="Nukes the channel the command was executed on (acts as a cleanup tool)")
+@bot.command(name="nuke", aliases=["nukechannel"], help="Nukes the channel the command was executed on (acts as a cleanup tool).")
 @commands.has_permissions(manage_messages=True)
-@commands.cooldown(1, 20, commands.BucketType.channel)  
+@commands.cooldown(1, 60, commands.BucketType.guild)  
 async def nuke(ctx):
     print("[@bot.command] Nuke was executed")
     channel = ctx.channel
@@ -107,8 +127,8 @@ async def nuke(ctx):
     await new_channel.send(embed=embed)
 #----------------------
 
-@bot.command(name='warn', aliases=['w'], help="Warns a user (Used for moderation).")
-@commands.has_permissions(manage_roles=True)
+@bot.command(name='warn', help="Gives out a warning to the specified user.")
+@commands.has_permissions(manage_messages=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
 async def warn(ctx, member: discord.Member, *, reason=None):
     print("[@bot.command] Warn was executed")
@@ -125,20 +145,22 @@ async def warn(ctx, member: discord.Member, *, reason=None):
     with open(f'data/warns/{ctx.guild.id}.json', 'w') as f:
         json.dump(warns, f)
     
-    if warns[str(member.id)] >= 10:
-        await member.ban(reason=f'Reached the maximum number of warns ({10})')
-        await ctx.send(f'**{member}** has been banned for reaching the maximum number of warns ({10})')
+    if warns[str(member.id)] >= 5:
+        await member.ban(reason=f'Reached the maximum number of warns ({5})')
+        await ctx.send(f'**{member}** has been banned for reaching the maximum number of warns ({5})')
     else:
         if reason:
             await ctx.send(f'**{member}** has been warned. They now have {warns[str(member.id)]} warnings. Reason: {reason}')
+            await member.send(f"You have been warned in **{ctx.guild.name}** for *{reason}*. You now have {warns[str(member.id)]} warnings.")
         else:
             await ctx.send(f'**{member}** has been warned. They now have {warns[str(member.id)]} warnings.')
+            await member.send(f"You have been warned in **{ctx.guild.name}**. You now have {warns[str(member.id)]} warnings.")
 
 
-@bot.command(name='removewarn', aliases=['rw'], help="Removes a specified ammount of warns from a User.")
+@bot.command(name='removewarn', aliases=['rw'], help="Removes a specified amount of warns from a User.")
 @commands.has_permissions(manage_roles=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
-async def removewarn(ctx, member: discord.Member, number: int):
+async def removewarn(ctx, member: discord.Member, number: int=1):
     print("[@bot.command] Removewarn was executed")
     await ctx.message.delete()
     if not os.path.exists(f'data/warns/{ctx.guild.id}.json'):
@@ -148,16 +170,17 @@ async def removewarn(ctx, member: discord.Member, number: int):
     with open(f'data/warns/{ctx.guild.id}.json', 'r') as f:
         warns = json.load(f)
     
-    if str(member.id) not in warns:
+    if str(member.id) not in warns or warns[str(member.id)] == 0:
         await ctx.send("This member has no warns to remove.", delete_after=5)
         return
     
-    warns[str(member.id)] = max(0, warns[str(member.id)] - number)
+    removed = min(number, warns[str(member.id)])
+    warns[str(member.id)] = max(0, warns[str(member.id)] - removed)
 
     with open(f'data/warns/{ctx.guild.id}.json', 'w') as f:
         json.dump(warns, f)
     
-    await ctx.send(f'Removed {number} warnings for **{member}**. They now have {warns[str(member.id)]} warns.', delete_after=5)
+    await ctx.send(f'Removed {removed} warnings for **{member}**. They now have {warns[str(member.id)]} warns.', delete_after=5)
 
 
 @bot.command(name='viewwarns', aliases=['vw', 'warns'], help="Disaplays the specified user's total Warns.")
@@ -167,20 +190,36 @@ async def viewwarns(ctx, member: discord.Member):
     print("[@bot.command] Viewwarns was executed")
     await ctx.message.delete()
     if not os.path.exists(f'data/warns/{ctx.guild.id}.json'):
-        await ctx.send("This server has no warns to view.", delete_after=5)
+        embed = discord.Embed(
+            title="User Warnings",
+            description="This server has no warns to view.",
+            color=discord.Color.blue()
+        )
+        message = await ctx.send(embed=embed)
+        await message.delete(delay=5)
         return
     
     with open(f'data/warns/{ctx.guild.id}.json', 'r') as f:
         warns = json.load(f)
     
-    if str(member.id) not in warns:
-        await ctx.send("This member has no warns.", delete_after=5)
+    if str(member.id) not in warns or warns[str(member.id)] == 0:
+        embed = discord.Embed(
+            title="User Warnings",
+            description=f"{member} has no warns.",
+            color=discord.Color.green()
+        )
+        await ctx.send(embed=embed)
         return
     
-    await ctx.send(f'**User Warnings:**\n> {member} has {warns[str(member.id)]} warns.')
+    embed = discord.Embed(
+        title="User Warnings",
+        description=f'{member} has {warns[str(member.id)]} warn(s).',
+        color=discord.Color.red()
+    )
+    await ctx.send(embed=embed)
 
 
-@bot.command(name='clearwarns', aliases=['cw'], help="Removes ALL warns from a user.")
+@bot.command(name='clearwarns', aliases=['cw'], help="Removes all warns from a user.")
 @commands.has_permissions(manage_roles=True)
 @commands.cooldown(2, 15, commands.BucketType.channel)  
 async def clearwarns(ctx, member: discord.Member):
@@ -193,7 +232,7 @@ async def clearwarns(ctx, member: discord.Member):
     with open(f'data/warns/{ctx.guild.id}.json', 'r') as f:
         warns = json.load(f)
     
-    if str(member.id) not in warns:
+    if str(member.id) not in warns or warns[str(member.id)] == 0:
         await ctx.send("This member has no warns to clear.", delete_after=5)
         return
     
@@ -205,7 +244,7 @@ async def clearwarns(ctx, member: discord.Member):
     await ctx.send(f'Cleared all warnings for **{member}**.', delete_after=5)
 #------------------------
 
-@bot.command(name='ban', aliases=['b'], help="Bans the specified user from the server.")
+@bot.command(name='ban', help="Bans the specified user from the server.")
 @commands.has_permissions(ban_members=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
 async def ban(ctx, member: discord.Member, *, reason=None):
@@ -213,6 +252,10 @@ async def ban(ctx, member: discord.Member, *, reason=None):
     await ctx.message.delete()
     await member.ban(reason=reason)
     await ctx.send(f'**{member}** has been banned.')
+    if reason:
+        await member.send(f"You have been banned from **{ctx.guild.name}** for *{reason}*.")
+    else:
+        await member.send(f"You have been banned from **{ctx.guild.name}**.")
 
 @bot.command(name='unban', help="Unbans the specified user from the server.")
 @commands.has_permissions(ban_members=True)
@@ -235,6 +278,10 @@ async def kick(ctx, member: discord.Member, *, reason=None):
     await ctx.message.delete()
     await member.kick(reason=reason)
     await ctx.send(f'**{member}** has been kicked from the server.')
+    if reason:
+        await member.send(f"You have been Kicked from **{ctx.guild.name}** for *{reason}*.")
+    else:
+        await member.send(f"You have been Kicked from **{ctx.guild.name}**.")
 #------------------------
 
 @bot.command(name='mute', aliases=['m'], help="Mutes the specified user for a specified amount of time. (Default: 1 hour)")
@@ -285,7 +332,7 @@ async def mute(ctx, member: discord.Member, duration: str = None, *, reason=None
     
     await member.add_roles(mute_role)
     if reason:
-        await ctx.send(f'**{member}** has been muted for **{duration}**. Reason: {reason}', delete_after=10)
+        await ctx.send(f'**{member}** has been muted for **{duration}**. Reason: *{reason}*', delete_after=10)
     else:
         await ctx.send(f'**{member}** has been muted for **{duration}**.', delete_after=5)
     
@@ -335,7 +382,7 @@ async def avatar(ctx, *, user: discord.Member = None):
     
     if user is None:
         user = ctx.author
-    avatar_url = user.avatar
+    avatar_url = user.avatar_url
     await ctx.send(avatar_url)
 #------------------------
 
