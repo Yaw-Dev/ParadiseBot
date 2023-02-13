@@ -8,6 +8,8 @@ uptime : Displays the application's uptime in chat.
 filesay [file] : Displays the contents of a file in chat (bot owner only).
 avatar [@user] : Displays the specified user's avatar in chat.
 echo [message] : Repeat whatever the user said in chat.
+serverinfo : Displays information about a guild. (name, member count, etc.)
+userinfo : Displays information about a user. (name, creation date, etc.)
 
 Moderation:
 warn [@user] {reason} : Warns the specified user (auto ban after 5 warns).
@@ -19,11 +21,13 @@ unban [user_id] : Unbans the specified user.
 kick [@user] : Kicks the specified user.
 purge [number] : Deletes the specified number of messages.
 mute [@user] [duration] {reason} : Mutes the specified user (mute role required).
-nuke : Nukes & recreates the channel the message was sent on (for chat cleanup)
+nuke : Nukes & recreates the channel the message was sent on (for chat cleanup).
 
 Server:
 setwelcome [#channel] [welcome message] : Configure the welcome event for your server.
-setverification [#channel] [@role] [message] : Configure the verification event for your server.
+setverification [#channel] [@role] [message] : Configure the verification system for your server.
+agecheck [on / off] : Enables / Disables the Account Age Checker function for your server.
+invfilter [on / off] : Enables / Disables the Invite Checker function for your server.
 
 Other:
 help [command] : Displays all available info for a command (usage and description).
