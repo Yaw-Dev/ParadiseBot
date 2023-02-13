@@ -7,7 +7,6 @@ import re
 import time
 from discord.ext import commands
 
-
 bot = commands.Bot(command_prefix=['=', '.'], intents=discord.Intents.all(), case_insensitive=True)
 #------------------------
 
@@ -38,7 +37,7 @@ async def purge(ctx, amount: int):
         await ctx.send("No messages were found to delete.", delete_after=5)
 #------------------------
 
-@bot.command(name='invite', aliases=['inv', 'authurl'], help="Displays the bot's OAuth URL (all perms)")
+@bot.command(name='invite', aliases=['inv', 'authurl'], help="Displays the Bot's OAuth URL (all perms)")
 @commands.cooldown(2, 20, commands.BucketType.channel)  
 async def invite(ctx):
     print("[@bot.command] Invite was executed")
@@ -52,7 +51,7 @@ async def invite(ctx):
 async def support(ctx):
     print("[@bot.command] Support was executed")
     await ctx.message.delete()
-    invite_url = f'https://discord.gg/kWvj4JsWbW'
+    invite_url = f'https://discord.gg/KYRGHm3Ccy'
     await ctx.send(f'Need help? Join our support server: {invite_url}')
 #------------------------
 
@@ -71,6 +70,55 @@ async def echo(ctx, *, message: str):
     print("[@bot.command] Echo was executed")
     await ctx.message.delete()
     await ctx.send(message)
+#------------------------
+
+@bot.command(name="serverinfo", help="Displays information about the server.")
+@commands.cooldown(1, 15, commands.BucketType.channel)
+async def serverinfo(ctx):
+    print("[@bot.command] Serverinfo was executed")
+    await ctx.message.delete()
+
+    embed = discord.Embed(title='Server Information', color=discord.Color.blue())
+    embed.add_field(name='Server Name', value=ctx.guild.name)
+    embed.add_field(name='Server Owner', value=ctx.guild.owner)
+    embed.add_field(name='Creation Date', value=ctx.guild.created_at.strftime("%m/%d/%Y %I:%M %p"))
+    embed.add_field(name='Member Count', value=ctx.guild.member_count)
+    embed.add_field(name='Channel Count', value=len(ctx.guild.text_channels) + len(ctx.guild.voice_channels))
+    embed.add_field(name='Role Count', value=len(ctx.guild.roles))
+    embed.set_thumbnail(url=ctx.guild.icon_url)
+
+    await ctx.send(embed=embed)
+#------------------------
+
+@bot.command(name="userinfo", help="Displays information about a user.")
+@commands.cooldown(1, 15, commands.BucketType.channel)
+async def userinfo(ctx, member: discord.Member = None):
+    print("[@bot.command] Userinfo was executed")
+    await ctx.message.delete()
+
+    if member is None:
+        member = ctx.author
+
+    embed = discord.Embed(title='User Information', color=discord.Color.blue())
+    embed.add_field(name='Username', value=member.name)
+    embed.add_field(name='Discriminator', value=member.discriminator)
+    embed.add_field(name='User ID', value=member.id)
+    embed.add_field(name='Creation Date', value=member.created_at.strftime("%m/%d/%Y %I:%M %p"))
+    embed.add_field(name='Nickname', value=member.nick if member.nick else 'None')
+    embed.add_field(name='Status', value=member.status)
+    embed.add_field(name='Nitro Status', value='Yes ✅' if member.premium_since else 'No ❌')
+    activity = member.activity
+    if activity:
+        activity_type = activity.type.name.capitalize()
+        activity_name = activity.name
+        activity_string = f"{activity_type} {activity_name}"
+        embed.add_field(name='Activity', value=activity_string)
+    else:
+        embed.add_field(name='Activity', value='None')
+    embed.add_field(name='Top Role', value=member.top_role)
+    embed.set_thumbnail(url=member.avatar_url)
+
+    await ctx.send(embed=embed)
 #------------------------
 
 start_time = time.time()
@@ -93,8 +141,8 @@ def uptime():
   if seconds > 0:
     uptime_str += " " + str(seconds) + " seconds"
 
-  start_time_str = datetime.datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')
-  current_time_str = datetime.datetime.fromtimestamp(current_time).strftime('%Y-%m-%d %H:%M:%S')
+  start_time_str = datetime.datetime.fromtimestamp(start_time).strftime('%d-%m-%Y %H:%M:%S')
+  current_time_str = datetime.datetime.fromtimestamp(current_time).strftime('%d-%m-%Y %H:%M:%S')
   uptime_str += "\n\n**Start Date:** " + start_time_str + "\n**Current Date:** " + current_time_str
   return uptime_str
 
@@ -133,6 +181,11 @@ async def nuke(ctx):
 async def warn(ctx, member: discord.Member, *, reason=None):
     print("[@bot.command] Warn was executed")
     await ctx.message.delete()
+    if member == ctx.author:
+        return await ctx.send("You cannot warn yourself!")
+    if member.top_role >= ctx.author.top_role:
+        return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
+
     if not os.path.exists(f'data/warns/{ctx.guild.id}.json'):
         with open(f'data/warns/{ctx.guild.id}.json', 'w') as f:
             json.dump({}, f)
@@ -250,12 +303,23 @@ async def clearwarns(ctx, member: discord.Member):
 async def ban(ctx, member: discord.Member, *, reason=None):
     print("[@bot.command] Ban was executed")
     await ctx.message.delete()
+    me = ctx.guild.me
+    if not me.guild_permissions.ban_members:
+        return await ctx.send("I do not have the necessary permissions to ban members.")
+    if member == ctx.author:
+        return await ctx.send("You cannot ban yourself!")
+    if member.top_role >= me.top_role:
+        return await ctx.send("I cannot perform this action on this user due to role hierarchy.")
+    if member.top_role >= ctx.author.top_role:
+        return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
+
     await member.ban(reason=reason)
     await ctx.send(f'**{member}** has been banned.')
     if reason:
         await member.send(f"You have been banned from **{ctx.guild.name}** for *{reason}*.")
     else:
         await member.send(f"You have been banned from **{ctx.guild.name}**.")
+
 
 @bot.command(name='unban', help="Unbans the specified user from the server.")
 @commands.has_permissions(ban_members=True)
@@ -276,6 +340,16 @@ async def unban(ctx, *, user: discord.User):
 async def kick(ctx, member: discord.Member, *, reason=None):
     print("[@bot.command] Kick was executed")
     await ctx.message.delete()
+    me = ctx.guild.me
+    if not me.guild_permissions.kick_members:
+        return await ctx.send("I do not have the permission to kick members.")
+    if member == ctx.author:
+        return await ctx.send("You cannot kick yourself!")
+    if member.top_role >= me.top_role:
+        return await ctx.send("I cannot kick members with the same or higher role than mine.")
+    if member.top_role >= ctx.author.top_role:
+        return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
+    
     await member.kick(reason=reason)
     await ctx.send(f'**{member}** has been kicked from the server.')
     if reason:
@@ -290,7 +364,14 @@ async def kick(ctx, member: discord.Member, *, reason=None):
 async def mute(ctx, member: discord.Member, duration: str = None, *, reason=None):
     print("[@bot.command] Mute was executed")
     await ctx.message.delete()
-
+    me = ctx.guild.me
+    if not me.guild_permissions.manage_roles:
+        return await ctx.send("I do not have the necessary permissions to mute members. (Manage Roles)")
+    if member == ctx.author:
+        return await ctx.send("You cannot mute yourself!")
+    if member.top_role >= ctx.author.top_role:
+        return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
+    
     mute_role = discord.utils.get(ctx.guild.roles, name='Muted')
 
     if mute_role is None:
@@ -332,9 +413,9 @@ async def mute(ctx, member: discord.Member, duration: str = None, *, reason=None
     
     await member.add_roles(mute_role)
     if reason:
-        await ctx.send(f'**{member}** has been muted for **{duration}**. Reason: *{reason}*', delete_after=10)
+        await ctx.send(f'**{member}** has been muted for **{duration}**. Reason: *{reason}*')
     else:
-        await ctx.send(f'**{member}** has been muted for **{duration}**.', delete_after=5)
+        await ctx.send(f'**{member}** has been muted for **{duration}**.')
     
     await asyncio.sleep(value)
     
@@ -346,7 +427,7 @@ async def mute(ctx, member: discord.Member, duration: str = None, *, reason=None
 @commands.has_permissions(manage_roles=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
 async def unmute(ctx, member: discord.Member):
-    print("[@bot.command] Unmute was executed")
+    print("[@bot.command] Unmute was executed}")
     await ctx.message.delete()
 
     mute_role = discord.utils.get(ctx.guild.roles, name='Muted')
@@ -413,6 +494,8 @@ async def on_raw_reaction_add(event):
 @bot.command(name='setverify', aliases=['setverification'], help="Use this command to configure the Verification Channel and Message for your server.")
 @commands.cooldown(2, 20, commands.BucketType.channel)  
 async def setverification(ctx, channel: discord.TextChannel, role: discord.Role, *, message: str):
+    print("[@bot.command] Setverify was executed")
+
     if not ctx.author.guild_permissions.manage_guild:
         await ctx.send('You do not have the "Manage Server" permission.', delete_after=5)
         return
@@ -435,6 +518,8 @@ async def setverification(ctx, channel: discord.TextChannel, role: discord.Role,
 #-----------------------
 
 @bot.command(name='setwelcome', aliases=['cfgwelcome'], help="Use this command to configure the Welcome Channel and Message of your server.")
+@commands.cooldown(1, 20, commands.BucketType.guild)
+@commands.has_permissions(manage_channels=True)
 async def setwelcomemessage(ctx, channel: discord.TextChannel = None, *, message):
     await ctx.message.delete()
     print("[@bot.command] Setwelcomemessage was executed")
@@ -457,9 +542,61 @@ async def setwelcomemessage(ctx, channel: discord.TextChannel = None, *, message
 
 with open('data/configs/welcome_messages.json', 'r') as f:
     config = json.load(f)
+#-----------------------
+
+@bot.command(name="agecheck", help="Turns `Account Age Checker` On or Off. Syntax: =agechecker on/off",)
+@commands.cooldown(1, 20, commands.BucketType.guild)
+@commands.has_permissions(manage_guild=True)
+async def agecheck(ctx, option):
+    print("[@bot.command] agecheck was executed")
+    
+    server_id = str(ctx.guild.id)
+    with open("data/configs/agecheck.json", "r") as f:
+        config = json.load(f)
+    if server_id not in config:
+        config[server_id] = {"enabled": False}
+    current_state = config[server_id]["enabled"]
+    
+    if option in ["on", "enable"]:
+        if current_state:
+            await ctx.send("Account Age Checker is already enabled.")
+        else:
+            config[server_id]["enabled"] = True
+            await ctx.send("Account Age Checker has been enabled.")
+    elif option in ["off", "disable"]:
+        if not current_state:
+            await ctx.send("Account Age Checker is already disabled.")
+        else:
+            config[server_id]["enabled"] = False
+            await ctx.send("Account Age Checker has been disabled.")
+    elif option in ["status", "show"]:
+        if current_state:
+            await ctx.send("Account Age Checker is currently **enabled**.")
+        else:
+            await ctx.send("Account Age Checker is currently **disabled**.")
+    else:
+        await ctx.send("Invalid option. Please use `on` or `off`.")
+    with open("data/configs/agecheck.json", "w") as f:
+        json.dump(config, f)
+#-----------------------
 
 @bot.event
 async def on_member_join(member):
+    server_id = str(member.guild.id)
+    with open("data/configs/agecheck.json", "r") as f:
+        config = json.load(f)
+    if server_id not in config or not config[server_id]["enabled"]:
+        return
+    acc_age = (datetime.datetime.now() - member.created_at).days
+    if acc_age < 7:
+        if acc_age <= 1:
+            await member.send(f"You have been automatically kicked from **{member.guild.name}** due to your account being too young. (Current account age: {acc_age} day)")
+        else:
+            await member.send(f"You have been automatically kicked from **{member.guild.name}** due to your account being too young. (Current account age: {acc_age} days)")
+        await member.kick(reason="Auto Kick | Account too young.")
+        return
+
+
     server_id = str(member.guild.id)
     welcome_message = config.get(server_id, 'Welcome to the server!')
     welcome_channel_id = config.get(f'{server_id}_channel')
@@ -470,6 +607,69 @@ async def on_member_join(member):
     channel = member.guild.get_channel(int(welcome_channel_id))
 
     await channel.send(f'{member.mention} {welcome_message}')
+#-----------------------
+
+async def check_invite(message):
+    invite_pattern = re.compile("(.gg\/.+)")
+    match = invite_pattern.search(message.content)
+
+    if match:
+        author_highest_role = message.author.roles[-1]
+        bot_highest_role = message.guild.me.roles[-1]
+        if author_highest_role >= bot_highest_role:
+            return
+
+        with open("data/configs/invfilter.json", "r") as config_file:
+            config = json.load(config_file)
+
+        server_id = str(message.guild.id)
+        if server_id not in config or not config[server_id]["enabled"]:
+            return
+
+        await message.delete()
+        await message.channel.send(f"{message.author.mention} Your message was removed for containing a discord invite.")
+
+
+@bot.command(name="invfilter", aliases=["invitefilter"], help="Turns `Invite Filter` On or Off. Syntax: =invfilter on/off")
+@commands.cooldown(1, 20, commands.BucketType.guild)
+@commands.has_permissions(manage_guild=True)
+async def invfilter(ctx, option):
+    print("[@bot.command] invfilter was executed")
+    
+    server_id = str(ctx.guild.id)
+    with open("data/configs/invfilter.json", "r") as f:
+        config = json.load(f)
+    if server_id not in config:
+        config[server_id] = {"enabled": False}
+    current_state = config[server_id]["enabled"]
+    
+    if option in ["on", "enable"]:
+        if current_state:
+            await ctx.send("Invite Filter is already enabled.")
+        else:
+            config[server_id]["enabled"] = True
+            await ctx.send("Invite Filter has been enabled.")
+    elif option in ["off", "disable"]:
+        if not current_state:
+            await ctx.send("Invite Filter is already disabled.")
+        else:
+            config[server_id]["enabled"] = False
+            await ctx.send("Invite Filter has been disabled.")
+    elif option in ["status", "show"]:
+        if current_state:
+            await ctx.send("Invite Filter is currently **enabled**.")
+        else:
+            await ctx.send("Invite Filter is currently **disabled**.")
+    else:
+        await ctx.send("Invalid option. Please use `on`, `off`, or `status`.")
+    with open("data/configs/invfilter.json", "w") as f:
+        json.dump(config, f)
+
+
+@bot.event
+async def on_message(message):
+    await check_invite(message)
+    await bot.process_commands(message)
 #------------------------
 
 @bot.event
