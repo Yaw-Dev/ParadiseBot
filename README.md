@@ -14,6 +14,8 @@ uptime : Displays the application's uptime in chat.<br>
 filesay [file] : Displays the contents of a file in chat (bot owner only).<br>
 avatar [@user] : Displays the specified user's avatar in chat.<br>
 echo [message] : Repeat whatever the user said in chat.<br>
+serverinfo : Displays information about a guild. (name, member count, etc.)<br>
+userinfo : Displays information about a user. (name, creation date, etc.)<br>
 <br>
 <b>Moderation:</b><br>
 warn [@user] {reason} : Warns the specified user (auto ban after 5 warns).<br>
@@ -30,6 +32,11 @@ nuke : Nukes & recreates the channel the message was sent on (for chat cleanup).
 <b>Server:</b><br>
 setwelcome [#channel] [welcome message] : Configure the welcome event for your server.<br>
 setverification [#channel] [@role] [message] : Configure the verification event for your server.<br>
+agecheck [on / off] : Enables / Disables the Account Age Checker function for your server.<br>
+invfilter [on / off] : Enables / Disables the Invite Checker function for your server.<br>
+<br>
+<b>Other:</b><br>
+help [command] : Displays all available info for a command (usage and description).
 <br>
 <h1>How to Setup</h1>
 1. Open <b>main.py</b> and scroll all the way down.<br>
@@ -37,18 +44,23 @@ setverification [#channel] [@role] [message] : Configure the verification event 
 3. If you want to host the bot on your local machine run <b>deploy.bat</b>.<br>
 4. Run <b>main.py</b>.<br>
 <br>
-<h2>Changelog (05.02.2023)</h2>
-- Improved `removewarn` command. (set default *number* value, checks)<br>
-- Improved `clearwarns` command. (checks)<br>
-- Improved `viewwarns` command. (embed, checks)<br>
-- Improved `uptime` command. (if statements for time, embed)<br>
-- Modified `warn` command.<br>
-- Modified cooldowns for some commands.<br>
-- Offenders will now be DMed on `Ban`, `Kick`, `Warn` & `Mute`.<br>
-- Reverted changes to the `avatar` command.<br>
-- Fixed some typos.<br>
+<h2>Changelog (13.02.2023)</h2>
+- Added `Invite Filter`. (deletes random discord invs sent by users)<br>
+- Added `invfilter` command. (turns invite filter on / off)<br>
+- Added `Account Age Checker`. (kicks user if acc age < 7 days)<br>
+- Added `agechecker` command. (turns account age checker on / off)<br>
+- Added `userinfo` command.<br>
+- Added `serverinfo` command.<br>
+- Improved `warn` & related commands.<br>
+- Improved `ban` command.<br>
+- Improved `kick` command.<br>
+- Improved `mute` command.<br>
+- Modified `purge` command.<br>
+- Fixed `setwelcome` command. (fixed perms)<br>
+- Fixed `support` command. (invalid invite)<br>
+- Fixed some more typos.<br>
 <hr>
 <br>
 Made by <b>A WeirD KiD#2452</b> & <b>JuicyChann#0224</b><br>
-Join our <a href="https://discord.gg/kWvj4JsWbW">Discord Server</a> for support & additional information!<br>
+Join our <a href="https://discord.gg/KYRGHm3Ccy">Discord Server</a> for support & additional information!<br>
 More updates coming soon :)
