@@ -61,6 +61,6 @@ help [command] : Displays all available info for a command (usage and descriptio
 - Fixed some more typos.<br>
 <hr>
 <br>
-Made by <b>A WeirD KiD#2452</b> & <b>JuicyChann#0224</b><br>
+Made by <b>A WeirD KiD#2452</b> & <b>Yaw#0224</b><br>
 Join our <a href="https://discord.gg/KYRGHm3Ccy">Discord Server</a> for support & additional information!<br>
 More updates coming soon :)
