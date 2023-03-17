@@ -15,7 +15,17 @@ bot = commands.Bot(command_prefix=['=', '.'], intents=discord.Intents.all(), cas
 @commands.cooldown(3, 25, commands.BucketType.channel)  
 async def purge(ctx, amount: int):
     print("[@bot.command] Purge was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+
+    me = ctx.guild.me
+    if not me.guild_permissions.manage_messages:
+        return await ctx.send("I do not have the necessary permissions to purge messages. (Manage Messages)")
+    if not ctx.author.guild_permissions.manage_guild:
+        await ctx.send('You cannot perform this action due to missing permissions. (Manage Messages)', delete_after=5)
+        return
 
     if amount > 100:
         await ctx.send("You cannot delete more than 100 messages at a time.", delete_after=5)
@@ -41,7 +51,10 @@ async def purge(ctx, amount: int):
 @commands.cooldown(2, 20, commands.BucketType.channel)  
 async def invite(ctx):
     print("[@bot.command] Invite was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
     auth_url = discord.utils.oauth_url(bot.user.id, permissions=discord.Permissions.all())
     await ctx.send(f'My OAuth URL:\n> {auth_url}')
 #------------------------
@@ -50,16 +63,22 @@ async def invite(ctx):
 @commands.cooldown(2, 20, commands.BucketType.channel)  
 async def support(ctx):
     print("[@bot.command] Support was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
     invite_url = f'https://discord.gg/KYRGHm3Ccy'
     await ctx.send(f'Need help? Join our support server: {invite_url}')
 #------------------------
 
 @bot.command(name='source', help="Gives out the github repo of the bot.")
-@commands.cooldown(1, 20, commands.BucketType.channel)  
+@commands.cooldown(2, 20, commands.BucketType.channel)  
 async def support(ctx):
     print("[@bot.command] Source was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
     repourl = f'https://github.com/AWeirDKiD/ParadiseBot'
     await ctx.send(f'Yes! I am open source: {repourl}')
 #------------------------
@@ -68,7 +87,10 @@ async def support(ctx):
 @commands.cooldown(3, 15, commands.BucketType.channel)  
 async def echo(ctx, *, message: str):
     print("[@bot.command] Echo was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
     await ctx.send(message)
 #------------------------
 
@@ -76,7 +98,10 @@ async def echo(ctx, *, message: str):
 @commands.cooldown(1, 15, commands.BucketType.channel)
 async def serverinfo(ctx):
     print("[@bot.command] Serverinfo was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
 
     embed = discord.Embed(title='Server Information', color=discord.Color.blue())
     embed.add_field(name='Server Name', value=ctx.guild.name)
@@ -91,10 +116,13 @@ async def serverinfo(ctx):
 #------------------------
 
 @bot.command(name="userinfo", help="Displays information about a user.")
-@commands.cooldown(1, 15, commands.BucketType.channel)
+@commands.cooldown(3, 15, commands.BucketType.channel)
 async def userinfo(ctx, member: discord.Member = None):
     print("[@bot.command] Userinfo was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
 
     if member is None:
         member = ctx.author
@@ -123,39 +151,42 @@ async def userinfo(ctx, member: discord.Member = None):
 
 start_time = time.time()
 def uptime():
-  current_time = time.time()
-  uptime = current_time - start_time
+    current_time = time.time()
+    uptime = current_time - start_time
 
-  days = int(uptime // 86400)
-  hours = int(uptime % 86400 // 3600)
-  minutes = int(uptime % 3600 // 60)
-  seconds = int(uptime % 60)
+    days = int(uptime // 86400)
+    hours = int(uptime % 86400 // 3600)
+    minutes = int(uptime % 3600 // 60)
+    seconds = int(uptime % 60)
 
-  uptime_str = "**Current Uptime:**"
-  if days > 0:
-    uptime_str += " " + str(days) + " days"
-  if hours > 0:
-    uptime_str += " " + str(hours) + " hours"
-  if minutes > 0:
-    uptime_str += " " + str(minutes) + " minutes"
-  if seconds > 0:
-    uptime_str += " " + str(seconds) + " seconds"
+    uptime_str = "**Current Uptime:**"
+    if days > 0:
+        uptime_str += " " + str(days) + " days"
+    if hours > 0:
+        uptime_str += " " + str(hours) + " hours"
+    if minutes > 0:
+        uptime_str += " " + str(minutes) + " minutes"
+    if seconds > 0:
+        uptime_str += " " + str(seconds) + " seconds"
 
-  start_time_str = datetime.datetime.fromtimestamp(start_time).strftime('%d-%m-%Y %H:%M:%S')
-  current_time_str = datetime.datetime.fromtimestamp(current_time).strftime('%d-%m-%Y %H:%M:%S')
-  uptime_str += "\n\n**Start Date:** " + start_time_str + "\n**Current Date:** " + current_time_str
-  return uptime_str
+    start_time_str = datetime.datetime.fromtimestamp(start_time).strftime('%d-%m-%Y %H:%M:%S')
+    current_time_str = datetime.datetime.fromtimestamp(current_time).strftime('%d-%m-%Y %H:%M:%S')
+    uptime_str += "\n\n**Start Date:** " + start_time_str + "\n**Current Date:** " + current_time_str
+    return uptime_str
 
 
 @bot.command(name='uptime', aliases=['awaketime'], help="Displays the bot's current uptime and start date.")
 @commands.cooldown(2, 30, commands.BucketType.channel)
 async def appuptime(ctx):
-  print("[@bot.command] Uptime was executed")
-  await ctx.message.delete()
-  uptime_str = uptime()
-  embed = discord.Embed(title="Online Status", description=uptime_str, color=discord.Color.green())
-  embed.set_thumbnail(url="https://raw.githubusercontent.com/AWeirDKiD/ParadiseBot/cb3778d1927340a9413cbb46a5781e89c87f8e86/assets/logo.png")
-  await ctx.send(embed=embed)
+    print("[@bot.command] Uptime was executed")
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+    uptime_str = uptime()
+    embed = discord.Embed(title="Online Status", description=uptime_str, color=discord.Color.green())
+    embed.set_thumbnail(url="https://raw.githubusercontent.com/AWeirDKiD/ParadiseBot/cb3778d1927340a9413cbb46a5781e89c87f8e86/assets/logo.png")
+    await ctx.send(embed=embed)
 #----------------------
 
 @bot.command(name="nuke", aliases=["nukechannel"], help="Nukes the channel the command was executed on (acts as a cleanup tool).")
@@ -178,13 +209,24 @@ async def nuke(ctx):
 @bot.command(name='warn', help="Gives out a warning to the specified user.")
 @commands.has_permissions(manage_messages=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
-async def warn(ctx, member: discord.Member, *, reason=None):
+async def warn(ctx, member: discord.Member = None, *, reason=None):
     print("[@bot.command] Warn was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+    if not member:
+        await ctx.send("Please specify a user to warn.", delete_after=5)
+        return
+    me = ctx.guild.me
     if member == ctx.author:
         return await ctx.send("You cannot warn yourself!")
     if member.top_role >= ctx.author.top_role:
         return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
+    if not me.guild_permissions.manage_roles:
+        return await ctx.send("I do not have the necessary permissions to mute members. (Manage Roles)")
+    if member.bot:
+        return await ctx.send("I'm unable to warn a bot.")
 
     if not os.path.exists(f'data/warns/{ctx.guild.id}.json'):
         with open(f'data/warns/{ctx.guild.id}.json', 'w') as f:
@@ -213,11 +255,32 @@ async def warn(ctx, member: discord.Member, *, reason=None):
 @bot.command(name='removewarn', aliases=['rw'], help="Removes a specified amount of warns from a User.")
 @commands.has_permissions(manage_roles=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
-async def removewarn(ctx, member: discord.Member, number: int=1):
+async def removewarn(ctx, member: discord.Member = None, number: int=1):
     print("[@bot.command] Removewarn was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+    if not member:
+        await ctx.send("Please specify a user to remove warns from.", delete_after=5)
+        return
+    me = ctx.guild.me
+    if not me.guild_permissions.manage_roles:
+        return await ctx.send("I do not have the necessary permissions to warn members. (Manage Roles)")
+    if member.top_role >= ctx.author.top_role:
+        return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
+
     if not os.path.exists(f'data/warns/{ctx.guild.id}.json'):
         await ctx.send("This server has no warns to remove.", delete_after=5)
+        return
+    
+    me = ctx.guild.me
+    if member.top_role >= me.top_role:
+        return await ctx.send("I cannot perform this action on this user due to role hierarchy.")
+    if member.top_role >= ctx.author.top_role:
+        return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
+    if not member:
+        await ctx.send("Please specify a user to remove warns from.", delete_after=5)
         return
     
     with open(f'data/warns/{ctx.guild.id}.json', 'r') as f:
@@ -238,10 +301,22 @@ async def removewarn(ctx, member: discord.Member, number: int=1):
 
 @bot.command(name='viewwarns', aliases=['vw', 'warns'], help="Disaplays the specified user's total Warns.")
 @commands.has_permissions(manage_roles=True)
-@commands.cooldown(3, 20, commands.BucketType.channel)  
-async def viewwarns(ctx, member: discord.Member):
+@commands.cooldown(3, 15, commands.BucketType.channel)  
+async def viewwarns(ctx, member: discord.Member = None):
     print("[@bot.command] Viewwarns was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+    if not member:
+        await ctx.send("Please specify a user. (Error: Missing Arguments)", delete_after=5)
+        return
+    me = ctx.guild.me
+    if member.top_role >= me.top_role:
+        return await ctx.send("I cannot perform this action on this user due to role hierarchy.")
+    if member.top_role >= ctx.author.top_role:
+        return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
+
     if not os.path.exists(f'data/warns/{ctx.guild.id}.json'):
         embed = discord.Embed(
             title="User Warnings",
@@ -274,10 +349,22 @@ async def viewwarns(ctx, member: discord.Member):
 
 @bot.command(name='clearwarns', aliases=['cw'], help="Removes all warns from a user.")
 @commands.has_permissions(manage_roles=True)
-@commands.cooldown(2, 15, commands.BucketType.channel)  
-async def clearwarns(ctx, member: discord.Member):
+@commands.cooldown(3, 15, commands.BucketType.channel)  
+async def clearwarns(ctx, member: discord.Member = None):
     print("[@bot.command] Clearwarns was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+    if not member:
+        await ctx.send("Please specify a user to clear warns from.", delete_after=5)
+        return
+    me = ctx.guild.me
+    if member.top_role >= me.top_role:
+        return await ctx.send("I cannot perform this action on this user due to role hierarchy.")
+    if member.top_role >= ctx.author.top_role:
+        return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
+
     if not os.path.exists(f'data/warns/{ctx.guild.id}.json'):
         await ctx.send("This server has no warns to clear.", delete_after=5)
         return
@@ -300,9 +387,15 @@ async def clearwarns(ctx, member: discord.Member):
 @bot.command(name='ban', help="Bans the specified user from the server.")
 @commands.has_permissions(ban_members=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
-async def ban(ctx, member: discord.Member, *, reason=None):
+async def ban(ctx, member: discord.Member = None, *, reason=None):
     print("[@bot.command] Ban was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+    if not member:
+        await ctx.send("Please specify a user to ban.")
+        return
     me = ctx.guild.me
     if not me.guild_permissions.ban_members:
         return await ctx.send("I do not have the necessary permissions to ban members.")
@@ -324,9 +417,21 @@ async def ban(ctx, member: discord.Member, *, reason=None):
 @bot.command(name='unban', help="Unbans the specified user from the server.")
 @commands.has_permissions(ban_members=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
-async def unban(ctx, *, user: discord.User):
+async def unban(ctx, *, user: discord.User = None):
     print("[@bot.command] Unban was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+    if not user:
+        await ctx.send("Please specify a user to unban.", delete_after=5)
+        return
+    me = ctx.guild.me
+    if not me.guild_permissions.ban_members:
+        return await ctx.send("I do not have the necessary permissions to unban members. (Ban Members)")
+    if user.top_role >= ctx.author.top_role:
+        return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
+
     try:
         await ctx.guild.unban(user)
         await ctx.send(f'**{user}** has been unbanned.', delete_after=5)
@@ -337,9 +442,15 @@ async def unban(ctx, *, user: discord.User):
 @bot.command(name='kick', aliases=['k'], help="Kicks the specified user from the server.")
 @commands.has_permissions(kick_members=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
-async def kick(ctx, member: discord.Member, *, reason=None):
+async def kick(ctx, member: discord.Member = None, *, reason=None):
     print("[@bot.command] Kick was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+    if not member:
+        await ctx.send("Please specify a user to kick", delete_after=5)
+        return
     me = ctx.guild.me
     if not me.guild_permissions.kick_members:
         return await ctx.send("I do not have the permission to kick members.")
@@ -361,9 +472,15 @@ async def kick(ctx, member: discord.Member, *, reason=None):
 @bot.command(name='mute', aliases=['m'], help="Mutes the specified user for a specified amount of time. (Default: 1 hour)")
 @commands.has_permissions(manage_messages=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
-async def mute(ctx, member: discord.Member, duration: str = None, *, reason=None):
+async def mute(ctx, member: discord.Member = None, duration: str = None, *, reason=None):
     print("[@bot.command] Mute was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+    if not member:
+        await ctx.send("Please specify a user to mute.", delete_after=5)
+        return
     me = ctx.guild.me
     if not me.guild_permissions.manage_roles:
         return await ctx.send("I do not have the necessary permissions to mute members. (Manage Roles)")
@@ -371,6 +488,8 @@ async def mute(ctx, member: discord.Member, duration: str = None, *, reason=None
         return await ctx.send("You cannot mute yourself!")
     if member.top_role >= ctx.author.top_role:
         return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
+    if member.bot:
+        return await ctx.send("I'm unable to mute a bot.")
     
     mute_role = discord.utils.get(ctx.guild.roles, name='Muted')
 
@@ -426,9 +545,20 @@ async def mute(ctx, member: discord.Member, duration: str = None, *, reason=None
 @bot.command(name='unmute', aliases=['um'], help="Unmutes the specified user.")
 @commands.has_permissions(manage_roles=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
-async def unmute(ctx, member: discord.Member):
-    print("[@bot.command] Unmute was executed}")
-    await ctx.message.delete()
+async def unmute(ctx, member: discord.Member = None):
+    print("[@bot.command] Unmute was executed")
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+    if not member:
+        await ctx.send("Please specify a user to unmute.")
+        return
+    me = ctx.guild.me
+    if not me.guild_permissions.manage_roles:
+        return await ctx.send("I do not have the necessary permissions to unmute members. (Manage Roles)")
+    if member.top_role >= ctx.author.top_role:
+        return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
 
     mute_role = discord.utils.get(ctx.guild.roles, name='Muted')
 
@@ -444,7 +574,10 @@ async def unmute(ctx, member: discord.Member):
 @commands.is_owner()
 async def filesay(ctx, file_name: str):
     print("[@bot.command] Filesay was executed")
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
     try:
         with open(file_name, 'r') as f:
             file_contents = f.read()
@@ -458,8 +591,11 @@ async def filesay(ctx, file_name: str):
 @bot.command(name='avatar', aliases=['av'], help="Displays the specified user's Avatar in chat.")
 @commands.cooldown(3, 25, commands.BucketType.channel)  
 async def avatar(ctx, *, user: discord.Member = None):
-    await ctx.message.delete()
     print("[@bot.command] Avatar was executed")
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
     
     if user is None:
         user = ctx.author
@@ -492,12 +628,16 @@ async def on_raw_reaction_add(event):
 
 
 @bot.command(name='setverify', aliases=['setverification'], help="Use this command to configure the Verification Channel and Message for your server.")
-@commands.cooldown(2, 20, commands.BucketType.channel)  
+@commands.cooldown(2, 20, commands.BucketType.channel)
+@commands.has_permissions(manage_roles=True)
 async def setverification(ctx, channel: discord.TextChannel, role: discord.Role, *, message: str):
     print("[@bot.command] Setverify was executed")
 
+    me = ctx.guild.me
+    if not me.guild_permissions.manage_roles:
+        return await ctx.send("I do not have the necessary permissions to verify members. (Manage Roles)")
     if not ctx.author.guild_permissions.manage_guild:
-        await ctx.send('You do not have the "Manage Server" permission.', delete_after=5)
+        await ctx.send('You cannot perform this action due to missing permissions. (Manage Server)', delete_after=5)
         return
 
     message = await channel.send(message)
@@ -521,11 +661,13 @@ async def setverification(ctx, channel: discord.TextChannel, role: discord.Role,
 @commands.cooldown(1, 20, commands.BucketType.guild)
 @commands.has_permissions(manage_channels=True)
 async def setwelcomemessage(ctx, channel: discord.TextChannel = None, *, message):
-    await ctx.message.delete()
     print("[@bot.command] Setwelcomemessage was executed")
 
+    if not ctx.author.guild_permissions.manage_guild:
+        await ctx.send('You cannot perform this action due to missing permissions. (Manage Server)', delete_after=5)
+        return
     if channel is None:
-        await ctx.send('Please specify a welcome channel. Syntax: =setwelcome #channel-name message', delete_after=5)
+        await ctx.send('Please specify a welcome channel. Syntax: =setwelcome #channel <message>', delete_after=5)
         return
 
     server_id = str(ctx.guild.id)
@@ -547,9 +689,19 @@ with open('data/configs/welcome_messages.json', 'r') as f:
 @bot.command(name="agecheck", help="Turns `Account Age Checker` On or Off. Syntax: =agechecker on/off",)
 @commands.cooldown(1, 20, commands.BucketType.guild)
 @commands.has_permissions(manage_guild=True)
-async def agecheck(ctx, option):
+async def agecheck(ctx, option=None):
     print("[@bot.command] agecheck was executed")
     
+    if option is None:
+        await ctx.send("Please specify an option (`on`, `off`, or `status`).")
+        return
+    me = ctx.guild.me
+    if not me.guild_permissions.manage_roles:
+        return await ctx.send("I do not have the necessary permissions to kick members.")
+    if not ctx.author.guild_permissions.manage_guild:
+        await ctx.send('You cannot perform this action due to missing permissions. (Manage Server)', delete_after=5)
+        return
+
     server_id = str(ctx.guild.id)
     with open("data/configs/agecheck.json", "r") as f:
         config = json.load(f)
@@ -583,30 +735,31 @@ async def agecheck(ctx, option):
 @bot.event
 async def on_member_join(member):
     server_id = str(member.guild.id)
+
+    with open("data/configs/welcome_messages.json", "r") as f:
+        config = json.load(f)
+    welcome_message = config.get(server_id, "Welcome to the server!")
+    welcome_channel_id = config.get(f"{server_id}_channel")
+
     with open("data/configs/agecheck.json", "r") as f:
         config = json.load(f)
-    if server_id not in config or not config[server_id]["enabled"]:
-        return
-    acc_age = (datetime.datetime.now() - member.created_at).days
-    if acc_age < 7:
-        if acc_age <= 1:
-            await member.send(f"You have been automatically kicked from **{member.guild.name}** due to your account being too young. (Current account age: {acc_age} day)")
-        else:
-            await member.send(f"You have been automatically kicked from **{member.guild.name}** due to your account being too young. (Current account age: {acc_age} days)")
-        await member.kick(reason="Auto Kick | Account too young.")
-        return
-
-
-    server_id = str(member.guild.id)
-    welcome_message = config.get(server_id, 'Welcome to the server!')
-    welcome_channel_id = config.get(f'{server_id}_channel')
+    if server_id in config and config[server_id]["enabled"]:
+        acc_age = (datetime.datetime.now() - member.created_at).days
+        if acc_age < 7:
+            try:
+                if acc_age <= 1:
+                    await member.send(f"You have been automatically kicked from **{member.guild.name}** due to your account being too young. (Current account age: {acc_age} day)")
+                else:
+                    await member.send(f"You have been automatically kicked from **{member.guild.name}** due to your account being too young. (Current account age: {acc_age} days)")
+            except discord.Forbidden:
+                pass
+            await member.kick(reason="Auto Kick | Account too young.")
+            return
 
     if welcome_channel_id is None:
         return
-
     channel = member.guild.get_channel(int(welcome_channel_id))
-
-    await channel.send(f'{member.mention} {welcome_message}')
+    await channel.send(f"{member.mention} {welcome_message}")
 #-----------------------
 
 async def check_invite(message):
@@ -626,15 +779,28 @@ async def check_invite(message):
         if server_id not in config or not config[server_id]["enabled"]:
             return
 
-        await message.delete()
-        await message.channel.send(f"{message.author.mention} Your message was removed for containing a discord invite.")
+        try:
+            await message.delete()
+            await message.channel.send(f"{message.author.mention} Your message was removed for potentially containing a discord invite.")
+        except (discord.errors.NotFound, discord.errors.Forbidden):
+            pass
 
 
 @bot.command(name="invfilter", aliases=["invitefilter"], help="Turns `Invite Filter` On or Off. Syntax: =invfilter on/off")
 @commands.cooldown(1, 20, commands.BucketType.guild)
 @commands.has_permissions(manage_guild=True)
-async def invfilter(ctx, option):
+async def invfilter(ctx, option=None):
     print("[@bot.command] invfilter was executed")
+    
+    if option is None:
+        await ctx.send("Please specify an option (`on`, `off`, or `status`).")
+        return
+    me = ctx.guild.me
+    if not me.guild_permissions.manage_roles:
+        return await ctx.send("I do not have the necessary permissions to delete messages. (Manage Messages)")
+    if not ctx.author.guild_permissions.manage_guild:
+        await ctx.send('You cannot perform this action due to missing permissions. (Manage Server)', delete_after=5)
+        return
     
     server_id = str(ctx.guild.id)
     with open("data/configs/invfilter.json", "r") as f:
