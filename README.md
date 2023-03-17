@@ -44,21 +44,18 @@ help [command] : Displays all available info for a command (usage and descriptio
 3. If you want to host the bot on your local machine run <b>deploy.bat</b>.<br>
 4. Run <b>main.py</b>.<br>
 <br>
-<h2>Changelog (13.02.2023)</h2>
-- Added `Invite Filter`. (deletes random discord invs sent by users)<br>
-- Added `invfilter` command. (turns invite filter on / off)<br>
-- Added `Account Age Checker`. (kicks user if acc age < 7 days)<br>
-- Added `agechecker` command. (turns account age checker on / off)<br>
-- Added `userinfo` command.<br>
-- Added `serverinfo` command.<br>
-- Improved `warn` & related commands.<br>
-- Improved `ban` command.<br>
-- Improved `kick` command.<br>
-- Improved `mute` command.<br>
-- Modified `purge` command.<br>
-- Fixed `setwelcome` command. (fixed perms)<br>
-- Fixed `support` command. (invalid invite)<br>
-- Fixed some more typos.<br>
+<h2>Changelog (17.03.2023)</h2>
+- Added if statements for missing arguments on every command.<br>
+- Bot will now *pass* discord.Forbidden exceptions on DM.<br>
+- Fixed bot not responding. (forbidden errors bc of perms)<br>
+- Fixed fatal issue on `welcome` event.<br>
+- Fixed permissions for `setverification`.<br>
+- Fixed bot being able to warn / mute other bots. (or itself)
+- Added perm checks on `check_invite`. (invite filter)<br>
+- Added perm checks for `purge`.<br>
+- Made changes to a lot of messages.<br>
+- Optimised command cooldowns.<br>
+- Fixed some typos.<br>
 <hr>
 <br>
 Made by <b>A WeirD KiD#2452</b> & <b>Yaw#0224</b><br>
