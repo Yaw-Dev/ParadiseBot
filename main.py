@@ -47,6 +47,31 @@ async def purge(ctx, amount: int):
         await ctx.send("No messages were found to delete.", delete_after=5)
 #------------------------
 
+@bot.command(name="setslowmode", help="Allows the user to set a custom value for slowmode in the current channel. (Seconds)")
+@commands.has_permissions(manage_guild=True)
+@commands.cooldown(1, 20, commands.BucketType.channel)
+async def slowmode(ctx, seconds: int=None):
+    print("[@bot.command] Setslowmode was executed")
+    try:
+        await ctx.message.delete()
+    except discord.Forbidden as e:
+        pass
+
+    me = ctx.guild.me
+    if not me.guild_permissions.manage_messages:
+        return await ctx.send("I do not have the necessary permissions to change the slowmode. (Manage Server)")
+    if not ctx.author.guild_permissions.manage_guild:
+        await ctx.send('You cannot perform this action due to missing permissions. (Manage Server)', delete_after=5)
+        return
+    
+    if seconds is None:
+        await ctx.send("Please input a time value in seconds. (eg: .setslowmode 2)", delete_after=5)
+        return
+
+    await ctx.channel.edit(slowmode_delay=seconds)
+    await ctx.send(f'Slowmode has been set to {seconds} second(s).')
+#------------------------
+
 @bot.command(name='invite', aliases=['inv', 'authurl'], help="Displays the Bot's OAuth URL (all perms)")
 @commands.cooldown(2, 20, commands.BucketType.channel)  
 async def invite(ctx):
@@ -299,7 +324,7 @@ async def removewarn(ctx, member: discord.Member = None, number: int=1):
     await ctx.send(f'Removed {removed} warnings for **{member}**. They now have {warns[str(member.id)]} warns.', delete_after=5)
 
 
-@bot.command(name='viewwarns', aliases=['vw', 'warns'], help="Disaplays the specified user's total Warns.")
+@bot.command(name='viewwarns', aliases=['vw', 'warns'], help="Displays the specified user's total Warns.")
 @commands.has_permissions(manage_roles=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
 async def viewwarns(ctx, member: discord.Member = None):
@@ -429,8 +454,6 @@ async def unban(ctx, *, user: discord.User = None):
     me = ctx.guild.me
     if not me.guild_permissions.ban_members:
         return await ctx.send("I do not have the necessary permissions to unban members. (Ban Members)")
-    if user.top_role >= ctx.author.top_role:
-        return await ctx.send("You cannot perform this action on this user due to role hierarchy.")
 
     try:
         await ctx.guild.unban(user)
@@ -781,7 +804,8 @@ async def check_invite(message):
 
         try:
             await message.delete()
-            await message.channel.send(f"{message.author.mention} Your message was removed for potentially containing a discord invite.")
+            if isinstance(message.channel, discord.TextChannel):
+                await message.channel.send(f"{message.author.mention} Your message was removed for potentially containing a discord invite.")
         except (discord.errors.NotFound, discord.errors.Forbidden):
             pass
 
