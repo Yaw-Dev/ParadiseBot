@@ -1,6 +1,6 @@
 # ParadiseBot
 Paradise is an upcoming Discord Moderation Bot with tons of features!<br>
-Invite to your server by clicking <a href="https://discord.com/oauth2/authorize?client_id=1050774601287860357&scope=bot+applications.commands&permissions=2199023255551">here!</a> (Active 24/7)<br>
+Invite to your server by clicking <a href="https://discord.com/oauth2/authorize?client_id=1099349759359201329&scope=bot&permissions=8589934591">here!</a> (Active 24/7)<br>
 Warning: Some features may not work with Python 3.11 and later! (No support for DPY migration)
 <br><br>
 <h1>Features</h1>
