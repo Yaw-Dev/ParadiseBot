@@ -44,20 +44,13 @@ help [command] : Displays all available info for a command (usage and descriptio
 3. If you want to host the bot on your local machine run <b>deploy.bat</b>.<br>
 4. Run <b>main.py</b>.<br>
 <br>
-<h2>Changelog (17.03.2023)</h2>
-- Added if statements for missing arguments on every command.<br>
-- Bot will now *pass* discord.Forbidden exceptions on DM.<br>
-- Fixed bot not responding. (forbidden errors bc of perms)<br>
-- Fixed fatal issue on `welcome` event.<br>
-- Fixed permissions for `setverification`.<br>
-- Fixed bot being able to warn / mute other bots. (or itself)
-- Added perm checks on `check_invite`. (invite filter)<br>
-- Added perm checks for `purge`.<br>
-- Made changes to a lot of messages.<br>
-- Optimised command cooldowns.<br>
+<h2>Changelog (14.05.2023)</h2>
+- Added `setslowmode` command. (Custom Slowmode)<br>
+- Fixed error in `check_messages`. (Invite Filter)<br>
+- Fixed fatal flaw in `unaban` command.<br>
 - Fixed some typos.<br>
 <hr>
 <br>
-Made by <b>A WeirD KiD#2452</b> & <b>Yaw#0224</b><br>
+Made by <b>Yaw#5775</b><br>
 Join our <a href="https://discord.gg/KYRGHm3Ccy">Discord Server</a> for support & additional information!<br>
 More updates coming soon :)
