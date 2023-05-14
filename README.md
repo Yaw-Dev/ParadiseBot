@@ -34,6 +34,7 @@ setwelcome [#channel] [welcome message] : Configure the welcome event for your s
 setverification [#channel] [@role] [message] : Configure the verification event for your server.<br>
 agecheck [on / off] : Enables / Disables the Account Age Checker function for your server.<br>
 invfilter [on / off] : Enables / Disables the Invite Checker function for your server.<br>
+setslowmode [time] : Allows you to set a custom slowmode value for the text channel.<br>
 <br>
 <b>Other:</b><br>
 help [command] : Displays all available info for a command (usage and description).
