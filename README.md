@@ -28,6 +28,7 @@ kick [@user] : Kicks the specified user.<br>
 purge [number] : Deletes the specified number of messages.<br>
 mute [@user] [duration] {reason} : Mutes the specified user (mute role required).<br>
 nuke : Nukes & recreates the channel the message was sent on (for chat cleanup).<br>
+autonuke [#channel] [duration] : Sets up autonuke for the specified channel.<br>
 <br>
 <b>Server:</b><br>
 setwelcome [#channel] [welcome message] : Configure the welcome event for your server.<br>
@@ -45,11 +46,12 @@ help [command] : Displays all available info for a command (usage and descriptio
 3. If you want to host the bot on your local machine run <b>deploy.bat</b>.<br>
 4. Run <b>main.py</b>.<br>
 <br>
-<h2>Changelog (14.05.2023)</h2>
-- Added `setslowmode` command. (Custom Slowmode)<br>
-- Fixed error in `check_messages`. (Invite Filter)<br>
-- Fixed fatal flaw in `unaban` command.<br>
-- Fixed some typos.<br>
+<h2>Changelog (03.06.2023)</h2>
+- Added `Auto Nuke`<br>
+- Added `autonuke` command (Set up or turn off Auto Nuke)<br>
+- Improved `nuke` command. (Now copies channel overwrites)<br>
+- Modified `source` command.<br>
+- Bot owner can bypass rate limits.<br>
 <hr>
 <br>
 Made by <b>Yaw#5775</b><br>
