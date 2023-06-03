@@ -22,6 +22,7 @@ kick [@user] : Kicks the specified user.
 purge [number] : Deletes the specified number of messages.
 mute [@user] [duration] {reason} : Mutes the specified user (mute role required).
 nuke : Nukes & recreates the channel the message was sent on (for chat cleanup).
+autonuke [#channel] [duration] : Sets up autonuke for the specified channel.
 
 Server:
 setwelcome [#channel] [welcome message] : Configure the welcome event for your server.
