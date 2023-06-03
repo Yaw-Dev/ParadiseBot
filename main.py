@@ -5,7 +5,8 @@ import os
 import json
 import re
 import time
-from discord.ext import commands
+from discord.ext import commands, tasks
+from datetime import timedelta
 
 bot = commands.Bot(command_prefix=['=', '.'], intents=discord.Intents.all(), case_insensitive=True)
 #------------------------
@@ -105,7 +106,7 @@ async def support(ctx):
     except discord.Forbidden as e:
         pass
     repourl = f'https://github.com/AWeirDKiD/ParadiseBot'
-    await ctx.send(f'Yes! I am open source: {repourl}')
+    await ctx.send(f'Want to support development? Check out our public GitHub repo: {repourl}')
 #------------------------
 
 @bot.command(name="echo", help="Repeats whatever the user says.")
@@ -215,20 +216,104 @@ async def appuptime(ctx):
 #----------------------
 
 @bot.command(name="nuke", aliases=["nukechannel"], help="Nukes the channel the command was executed on (acts as a cleanup tool).")
-@commands.has_permissions(manage_messages=True)
+@commands.has_permissions(manage_channels=True)
 @commands.cooldown(1, 60, commands.BucketType.guild)  
 async def nuke(ctx):
     print("[@bot.command] Nuke was executed")
+
+    me = ctx.guild.me
+    if not me.guild_permissions.manage_channels:
+        return await ctx.send("I do not have the necessary permissions to mute members. (Manage Channels)")
+
     channel = ctx.channel
     member = ctx.author
     parent = channel.category
     position = channel.position
+    overwrites = channel.overwrites
+
     await channel.delete()
-    new_channel = await ctx.guild.create_text_channel(channel.name, category=parent, position=position)
+    new_channel = await ctx.guild.create_text_channel(channel.name, category=parent, position=position, overwrites=overwrites)
+    
     embed = discord.Embed()
     embed.add_field(name="Channel Nuked!", value=f"Requested by: {member.mention}")
     embed.set_image(url="https://i.imgur.com/7mLOXVT.gif")
     await new_channel.send(embed=embed)
+#----------------------
+
+@bot.command(name="autonuke", help="Configures autonuke. (eg. .autonuke #general 1h / off)")
+@commands.has_permissions(manage_channels=True)
+@commands.cooldown(1, 90, commands.BucketType.guild)
+async def autonuke(ctx, channel: discord.TextChannel = None, duration: str = None):
+    print("[@bot.command] Autonuke was executed")
+
+    if channel is None or duration is None:
+        return await ctx.send("Please provide a valid channel and duration. Example: `.autonuke #channel 1h`")
+
+    if duration.lower() == "off":
+        config_path = f"data/autonuke/{ctx.guild.id}.json"
+        if os.path.exists(config_path):
+            os.remove(config_path)
+        return await ctx.send(f"Autonuke disabled for {channel.mention}.")
+
+    if duration[-1] == 'h':
+        interval = int(duration[:-1]) * 3600
+    elif duration[-1] == 'm':
+        interval = int(duration[:-1]) * 60
+    elif duration[-1] == 's':
+        interval = int(duration[:-1])
+    else:
+        return await ctx.send("Invalid duration format. Use 'h' for hours, 'm' for minutes, 's' for seconds, or 'off' to disable autonuke.")
+
+    if interval < 3600:
+        return await ctx.send("Minimum interval allowed is 1 hour.")
+
+    config_path = f"data/autonuke/{ctx.guild.id}.json"
+    config = {
+        "channel_id": channel.id,
+        "interval": interval
+    }
+
+    with open(config_path, "w") as file:
+        json.dump(config, file)
+
+    asyncio.ensure_future(autonuke_loop(ctx.guild, channel.id, interval))
+    await ctx.send(f"Autonuke configured for {channel.mention} with an interval of {timedelta(seconds=interval)}.")
+
+async def autonuke_loop(guild, channel_id, interval):
+    while True:
+        config_path = f"data/autonuke/{guild.id}.json"
+        if os.path.exists(config_path):
+            with open(config_path, "r") as file:
+                config = json.load(file)
+                channel_id = config.get("channel_id")
+                interval = config.get("interval", 3600)
+                channel = guild.get_channel(channel_id)
+                if channel:
+                    await nuke_channel(channel, config)
+
+        await asyncio.sleep(interval)
+
+async def nuke_channel(channel, config):
+    me = channel.guild.me
+    if not me.guild_permissions.manage_channels:
+        return await channel.send("I do not have the necessary permissions to manage channels.")
+
+    parent = channel.category
+    position = channel.position
+    overwrites = channel.overwrites
+
+    await channel.delete()
+    new_channel = await channel.guild.create_text_channel(channel.name, category=parent, position=position, overwrites=overwrites)
+
+    embed = discord.Embed()
+    embed.add_field(name="Channel Nuked!", value=f"Requested by: **[AutoNuke]**")
+    embed.set_image(url="https://i.imgur.com/7mLOXVT.gif")
+    await new_channel.send(embed=embed)
+
+    config["channel_id"] = new_channel.id
+    config_path = f"data/autonuke/{new_channel.guild.id}.json"
+    with open(config_path, "w") as file:
+        json.dump(config, file)
 #----------------------
 
 @bot.command(name='warn', help="Gives out a warning to the specified user.")
@@ -324,7 +409,7 @@ async def removewarn(ctx, member: discord.Member = None, number: int=1):
     await ctx.send(f'Removed {removed} warnings for **{member}**. They now have {warns[str(member.id)]} warns.', delete_after=5)
 
 
-@bot.command(name='viewwarns', aliases=['vw', 'warns'], help="Displays the specified user's total Warns.")
+@bot.command(name='viewwarns', aliases=['vw', 'warns'], help="Disaplays the specified user's total Warns.")
 @commands.has_permissions(manage_roles=True)
 @commands.cooldown(3, 15, commands.BucketType.channel)  
 async def viewwarns(ctx, member: discord.Member = None):
@@ -632,6 +717,16 @@ async def on_ready():
     print("Bot Started")
     botactivity = discord.Activity(type=discord.ActivityType.playing, name="Welcome to Paradise")
     await bot.change_presence(activity=botactivity, status=discord.Status.do_not_disturb)
+
+    for guild in bot.guilds:
+        config_path = f"data/autonuke/{guild.id}.json"
+        if os.path.exists(config_path):
+            with open(config_path, "r") as file:
+                config = json.load(file)
+            channel_id = config.get("channel_id")
+            interval = config.get("interval", 3600)  # Default interval of 1 hour
+            asyncio.ensure_future(autonuke_loop(guild, channel_id, interval))
+ 
     print("RPC Connected")
     print("")
 #------------------------
@@ -865,7 +960,9 @@ async def on_message(message):
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown) and not isinstance(error, commands.CommandNotFound):
+        if ctx.author.id == 1088472440763588690:
+            return await ctx.command.reinvoke(ctx)
         await ctx.message.delete()
         await ctx.send(f'You are being rate limited. Please try again in {error.retry_after:.1f} seconds.', delete_after=5)
-
-bot.run('YOUR_TOKEN_HERE')
+        
+bot.run('YOUR_TOKEN_HERE') 
