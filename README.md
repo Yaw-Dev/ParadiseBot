@@ -54,6 +54,6 @@ help [command] : Displays all available info for a command (usage and descriptio
 - Bot owner can bypass rate limits.<br>
 <hr>
 <br>
-Made by <b>Yaw#5775</b><br>
+Made by <b>@juicychann</b><br>
 Join our <a href="https://discord.gg/KYRGHm3Ccy">Discord Server</a> for support & additional information!<br>
 More updates coming soon :)
